@@ -50,6 +50,18 @@ public final class PasswordGenerator {
 
         List<Character> chars = new ArrayList<>(options.length());
 
+        // Etape 1 : on impose un representant de chaque categorie active,
+        // pour respecter la demande explicite de l'utilisateur.
+        for (String pool : activePools) {
+            chars.add(pool.charAt(secureRandom.nextInt(pool.length())));
+        }
+
+        // Etape 2 : on complete le reste de la longueur en tirant dans
+        // l'alphabet combine de toutes les categories actives.
+        while (chars.size() < options.length()) {
+            chars.add(fullAlphabet.charAt(secureRandom.nextInt(fullAlphabet.length())));
+        }
+
         StringBuilder sb = new StringBuilder(chars.size());
         chars.forEach(sb::append);
         return sb.toString();
