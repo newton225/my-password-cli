@@ -28,7 +28,10 @@ public final class ArgumentParser {
         if (args.length == 0) {
             return parseInteractive();
         }
-
+        if (containsHelp(args)) {
+            printHelp();
+            System.exit(0);
+        }
 
         int length = 16;
         boolean upper = true, lower = true, digits = true, symbols = true;
@@ -127,4 +130,21 @@ public final class ArgumentParser {
         return false;
     }
 
+    private static void printHelp() {
+        System.out.println("""
+                Usage: java -jar password-cli.jar [options]
+
+                Options:
+                  --length=N        Longueur du mot de passe (defaut: 16)
+                  --upper/--no-upper    Inclure/exclure les majuscules (defaut: inclus)
+                  --lower/--no-lower    Inclure/exclure les minuscules (defaut: inclus)
+                  --digits/--no-digits  Inclure/exclure les chiffres (defaut: inclus)
+                  --symbols/--no-symbols Inclure/exclure les symboles (defaut: inclus)
+                  --count=N         Nombre de mots de passe a generer (mode rafale, defaut: 1)
+                  --no-server       Ne pas interroger le conteneur Docker de validation
+                  --help            Affiche cette aide
+
+                Sans argument, le programme passe en mode interactif.
+                """);
+    }
 }
