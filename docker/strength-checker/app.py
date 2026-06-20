@@ -20,6 +20,29 @@ app = Flask(__name__)
 
 
 
+@app.route("/check", methods=["POST"])
+def check():
+    """Recoit {"password": "..."} et retourne le score zxcvbn ainsi
+    qu'une estimation lisible du temps de cassage."""
+    data = request.get_json(silent=True)
+    if not data or "password" not in data:
+        return jsonify({"error": "Le champ 'password' est requis"}), 400
+
+    password = data["password"]
+    result = zxcvbn(password)
+
+    # On ne renvoie jamais le mot de passe lui-meme ni de details trop
+    # verbeux (sequences detectees, etc.) dans la reponse : seul le score
+    # agrege et une estimation de temps sont necessaires cote client Java,
+    # et cela limite ce qui transiterait en cas de capture reseau.
+    crack_time = result["crack_times_display"]["offline_slow_hashing_1e4_per_second"]
+
+    return jsonify({
+        "score": result["score"],
+        "crack_time_display": crack_time
+    }), 200
+
+
 if __name__ == "__main__":
     # 0.0.0.0 est necessaire pour que le port soit accessible depuis
     # l'exterieur du conteneur (depuis l'hote ou un autre conteneur).
