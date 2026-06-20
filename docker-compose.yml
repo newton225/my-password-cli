@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  strength-checker:
+    build:
+      context: ./docker/strength-checker
+    container_name: password-strength-checker
+    ports:
+      - "5000:5000"
+    restart: unless-stopped # Redémarre automatiquement sauf si arrêté manuellement
