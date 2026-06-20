@@ -14,7 +14,9 @@ import java.util.Scanner;
  *   --lower / --no-lower
  *   --digits / --no-digits
  *   --symbols / --no-symbols
+ *   --count=5            nombre de mots de passe a generer (mode rafale)
  *   --no-server          desactive l'appel au conteneur Docker (score local uniquement)
+ *   --help
  */
 public final class ArgumentParser {
 
@@ -27,6 +29,7 @@ public final class ArgumentParser {
             return parseInteractive();
         }
 
+
         int length = 16;
         boolean upper = true, lower = true, digits = true, symbols = true;
         int count = 1;
@@ -35,7 +38,9 @@ public final class ArgumentParser {
         for (String arg : args) {
             if (arg.startsWith("--length=")) {
                 length = parseIntArg(arg, "--length=");
-            }  else if (arg.equals("--upper")) {
+            } else if (arg.startsWith("--count=")) {
+                count = parseIntArg(arg, "--count=");
+            } else if (arg.equals("--upper")) {
                 upper = true;
             } else if (arg.equals("--no-upper")) {
                 upper = false;
@@ -53,6 +58,8 @@ public final class ArgumentParser {
                 symbols = false;
             } else if (arg.equals("--no-server")) {
                 noServer = true;
+            } else {
+                throw new IllegalArgumentException("Argument inconnu : " + arg + " (utilisez --help)");
             }
         }
 
@@ -111,5 +118,13 @@ public final class ArgumentParser {
         }
     }
 
+    private static boolean containsHelp(String[] args) {
+        for (String a : args) {
+            if (a.equals("--help") || a.equals("-h")) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
