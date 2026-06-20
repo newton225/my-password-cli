@@ -62,6 +62,10 @@ public final class PasswordGenerator {
             chars.add(fullAlphabet.charAt(secureRandom.nextInt(fullAlphabet.length())));
         }
 
+        // Etape 3 : melange final pour ne pas avoir un ordre previsible
+        // (les caracteres "obligatoires" sinon toujours en tete de chaine).
+        Collections.shuffle(chars, secureRandom);
+
         StringBuilder sb = new StringBuilder(chars.size());
         chars.forEach(sb::append);
         return sb.toString();
