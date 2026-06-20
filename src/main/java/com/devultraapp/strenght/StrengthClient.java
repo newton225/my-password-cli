@@ -55,6 +55,7 @@ public final class StrengthClient {
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(endpoint)
+                    .timeout(Duration.ofSeconds(3))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(body))
                     .build();
@@ -67,7 +68,7 @@ public final class StrengthClient {
 
             // System.out.println(response.body());
 
-            return null;
+            return parseJsonResponse(response.body());
 
         } catch (Exception e) {
             // Le conteneur n'est pas joignable (pas demarre, port different, etc.)
