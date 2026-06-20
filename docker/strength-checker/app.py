@@ -19,6 +19,13 @@ from zxcvbn import zxcvbn
 app = Flask(__name__)
 
 
+@app.route("/health", methods=["GET"])
+def health():
+    """Endpoint de supervision : permet de verifier que le conteneur
+    est demarre et pret a repondre, independamment de toute logique
+    metier (utile pour un healthcheck Docker)."""
+    return jsonify({"status": "ok"}), 200
+
 
 @app.route("/check", methods=["POST"])
 def check():
