@@ -49,9 +49,67 @@ public final class StrengthClient {
      * locale de secours (fromLocal=true).
      */
     public StrengthResult evaluate(String password) {
-        return null;
+        try {
+            String escaped = password.replace("\\", "\\\\").replace("\"", "\\\"");
+            String body = "{\"password\":\"" + escaped + "\"}";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(endpoint)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                return LocalStrengthEstimator.estimate(password);
+            }
+
+            // System.out.println(response.body());
+
+            return null;
+
+        } catch (Exception e) {
+            // Le conteneur n'est pas joignable (pas demarre, port different, etc.)
+            // -> degradation gracieuse plutot que crash de l'application.
+            return LocalStrengthEstimator.estimate(password);
+        }
     }
 
+    /**
+     * Parsing JSON minimaliste fait a la main (le format de reponse attendu
+     * du micro-service est volontairement tres simple et stable :
+     * {"score": 0-4, "crack_time_display": "..."}). On evite ainsi
+     * d'ajouter une dependance Jackson/Gson pour un seul champ a extraire.
+     */
+    private StrengthResult parseJsonResponse(String json) {
+        int score = extractInt(json, "\"score\"");
+        String crackTime = extractString(json, "\"crack_time_display\"");
+        return new StrengthResult(StrengthLevel.fromScore(score), crackTime, false);
+    }
 
+    private int extractInt(String json, String key) {
+        int idx = json.indexOf(key);
+        if (idx == -1) return 0;
+        int colon = json.indexOf(':', idx);
+        int start = colon + 1;
+        int end = start;
+        while (end < json.length() && (Character.isDigit(json.charAt(end)))) {
+            end++;
+        }
+        try {
+            return Integer.parseInt(json.substring(start, end).trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
 
+    private String extractString(String json, String key) {
+        int idx = json.indexOf(key);
+        if (idx == -1) return "inconnu";
+        int firstQuote = json.indexOf('"', json.indexOf(':', idx) + 1);
+        int secondQuote = json.indexOf('"', firstQuote + 1);
+        if (firstQuote == -1 || secondQuote == -1) return "inconnu";
+        return json.substring(firstQuote + 1, secondQuote);
+    }
 }
