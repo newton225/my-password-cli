@@ -13,7 +13,6 @@ MyPasswordCLI/                 # Application Java 21 (CLI)
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── docker-compose.yml         # Démarrage simplifié du conteneur
-
 ├── pom.xml
 ├── src/main/java/com/devultraapp/
 │   ├── Main.java
